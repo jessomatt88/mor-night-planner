@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOR Night Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .event-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .event-time {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .event-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .event-location {
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .event-description {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .event-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        
+        .event-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .event-link:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .plan-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌙 MOR Night Planner</h1>
+        <p class="subtitle">Plan your perfect NYC night</p>
+        
+        <form id="planForm">
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Starting Location</label>
+                <input type="text" id="location" name="location" placeholder="e.g., Brooklyn, Manhattan, Lower East Side" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="mood">Vibe</label>
+                <select id="mood" name="mood" required>
+                    <option value="warm-up">Warm-up (Early evening, chill)</option>
+                    <option value="threshold" selected>Threshold (Prime time energy)</option>
+                    <option value="climax">Climax (Late night peak)</option>
+                    <option value="afterglow">Afterglow (After hours wind down)</option>
+                </select>
+            </div>
+            
+            <button type="submit">Plan My Night</button>
+        </form>
+        
+        <div id="results" class="results">
+            <div class="plan-header">
+                <h2 id="planTitle">Your Night Plan</h2>
+                <p id="planSubtitle"></p>
+            </div>
+            <div id="itinerary"></div>
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            Planning your night...
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:8000';
+        
+        document.getElementById('date').valueAsDate = new Date();
+        
+        document.getElementById('planForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const date = document.getElementById('date').value;
+            const location = document.getElementById('location').value;
+            const mood = document.getElementById('mood').value;
+            
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_URL}/plan-night`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        date: date,
+                        starting_location: location,
+                        walking_radius: 1.0,
+                        mood: mood
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('error').textContent = `Error: ${error.message}. Make sure the API is running on ${API_URL}`;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+        
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            const itineraryDiv = document.getElementById('itinerary');
+            
+            document.getElementById('planTitle').textContent = data.message || 'Your Night Plan';
+            document.getElementById('planSubtitle').textContent = `${data.total_events} events found`;
+            
+            itineraryDiv.innerHTML = '';
+            
+            if (data.itinerary && data.itinerary.length > 0) {
+                data.itinerary.forEach(event => {
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'event-card';
+                    
+                    eventCard.innerHTML = `
+                        <div class="event-time">${event.time}</div>
+                        <div class="event-title">${event.title}</div>
+                        <div class="event-location">📍 ${event.location}</div>
+                        <div class="event-description">${event.description}</div>
+                        <div><strong>Price:</strong> ${event.price}</div>
+                        ${event.url ? `<div><a href="${event.url}" target="_blank" class="event-link">View Details →</a></div>` : ''}
+                        <div class="event-tags">
+                            ${event.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    `;
+                    
+                    itineraryDiv.appendChild(eventCard);
+                });
+            } else {
+                itineraryDiv.innerHTML = '<p>No events found for your criteria. Try running the scraper first!</p>';
+            }
+            
+            resultsDiv.classList.add('show');
+        }
+    </script>
+</body>
+</html>
