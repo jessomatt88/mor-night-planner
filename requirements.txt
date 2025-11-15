@@ -5,7 +5,7 @@ requests==2.31.0
 lxml==4.9.3
 
 # Database
-sqlite3
+# sqlite3 is built into Python
 
 # API Framework
 fastapi==0.104.1
