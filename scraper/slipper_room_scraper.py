@@ -3,6 +3,7 @@ from typing import List, Dict, Any
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+import re
 
 
 class SlipperRoomScraper(BaseScraper):
@@ -10,12 +11,11 @@ class SlipperRoomScraper(BaseScraper):
     
     def __init__(self):
         super().__init__('slipper_room')
-        self.base_url = 'https://www.slipperroom.com/calendar'
+        self.base_url = 'https://www.slipperroom.com/'
     
     def scrape(self) -> List[Dict[str, Any]]:
         """
-        Scrape events from Slipper Room website.
-        Note: This is a placeholder implementation that demonstrates the structure.
+        Scrape events from Slipper Room website using HTTP + BeautifulSoup.
         """
         self.clear_events()
         
@@ -24,49 +24,65 @@ class SlipperRoomScraper(BaseScraper):
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
             
-            response = requests.get(self.base_url, headers=headers, timeout=10)
+            response = requests.get(self.base_url, headers=headers, timeout=30)
+            response.raise_for_status()
             
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.content, 'html.parser')
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            event_items = soup.find_all('li')
+            
+            for item in event_items:
+                event_link = item.find('a', href=lambda x: x and '/event-details/' in x)
+                if not event_link:
+                    continue
                 
-                event_items = soup.find_all('div', class_='event-listing') or soup.find_all('li', class_='event')
+                title_elem = event_link
+                if not title_elem:
+                    continue
                 
-                for item in event_items[:10]:
-                    try:
-                        title_elem = item.find('h2') or item.find('h3') or item.find('span', class_='title')
-                        title = title_elem.get_text(strip=True) if title_elem else 'Slipper Room Show'
-                        
-                        desc_elem = item.find('div', class_='description') or item.find('p')
-                        description = desc_elem.get_text(strip=True) if desc_elem else 'Burlesque and variety show at Slipper Room'
-                        
-                        time_elem = item.find('time') or item.find('span', class_='date')
-                        datetime_str = time_elem.get('datetime') if time_elem and time_elem.get('datetime') else datetime.now().isoformat()
-                        
-                        location = 'Slipper Room, 167 Orchard St, New York, NY 10002'
-                        
-                        price_elem = item.find('span', class_='price')
-                        price = price_elem.get_text(strip=True) if price_elem else '$15-25'
-                        
-                        link_elem = item.find('a', href=True)
-                        url = link_elem['href'] if link_elem else self.base_url
-                        if not url.startswith('http'):
-                            url = f"https://www.slipperroom.com{url}"
-                        
-                        tags = ['nightlife', 'slipper_room', 'burlesque', 'variety', 'lower_east_side']
-                        
-                        event = self.create_event(
-                            title=title,
-                            description=description,
-                            datetime_str=datetime_str,
-                            location=location,
-                            price=price,
-                            url=url,
-                            tags=tags
-                        )
-                        self.events.append(event)
-                    except Exception as e:
-                        print(f"Error parsing Slipper Room event: {e}")
-                        continue
+                title = title_elem.get_text(strip=True)
+                if not title:
+                    continue
+                
+                event_url = event_link.get('href', '')
+                if event_url and not event_url.startswith('http'):
+                    event_url = f"https://www.slipperroom.com{event_url}"
+                
+                date_elem = item.find('div', string=re.compile(r'\w{3}\s+\d{1,2},\s+\d{4}'))
+                date_str = ""
+                time_str = ""
+                
+                if date_elem:
+                    date_text = date_elem.get_text(strip=True)
+                    
+                    date_match = re.search(r'(\w{3}\s+\d{1,2},\s+\d{4})', date_text)
+                    if date_match:
+                        date_str = date_match.group(1)
+                    
+                    time_match = re.search(r'(\d{1,2}:\d{2}\s*(?:AM|PM))', date_text)
+                    if time_match:
+                        time_str = time_match.group(1)
+                
+                if not date_str:
+                    continue
+                
+                try:
+                    datetime_obj = datetime.strptime(f"{date_str} {time_str}", "%b %d, %Y %I:%M %p")
+                    datetime_str = datetime_obj.isoformat()
+                except:
+                    datetime_str = datetime.now().isoformat()
+                
+                event = self.create_event(
+                    title=title,
+                    description='Burlesque and variety show at Slipper Room',
+                    datetime_str=datetime_str,
+                    location='Slipper Room, 167 Orchard St, New York, NY 10002',
+                    price='$15-25',
+                    url=event_url,
+                    tags=['nightlife', 'slipper_room', 'burlesque', 'variety', 'lower_east_side']
+                )
+                
+                self.events.append(event)
             
         except Exception as e:
             print(f"Error scraping Slipper Room: {e}")
