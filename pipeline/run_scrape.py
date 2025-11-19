@@ -20,6 +20,7 @@ from scraper import (
     ViewcyScraper
 )
 from utils.database import Database
+from utils.fallback_events import get_sample_events, is_fallback_enabled
 
 
 def deduplicate_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -107,6 +108,18 @@ def main():
     print(f"\nCurrent events in database: {db.get_event_count()}")
     
     events = run_all_scrapers()
+    
+    # 
+    if len(events) == 0 and is_fallback_enabled():
+        print("\n" + "!" * 50)
+        print("WARNING: All scrapers returned 0 events")
+        print("Inserting sample fallback events for local testing")
+        print("Set MOR_ENABLE_FALLBACK=0 to disable this behavior")
+        print("!" * 50)
+        
+        sample_events = get_sample_events()
+        events = sample_events
+        print(f"Added {len(sample_events)} sample events")
     
     print("\n" + "-" * 50)
     print("Storing events in database...")
