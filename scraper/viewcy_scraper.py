@@ -6,12 +6,12 @@ from datetime import datetime, timedelta
 import re
 
 
-class EventbriteScraper(BaseScraper):
-    """Scraper for Eventbrite NYC nightlife/performance/experience events"""
+class ViewcyScraper(BaseScraper):
+    """Scraper for Viewcy.com NYC events"""
     
     def __init__(self):
-        super().__init__('eventbrite')
-        self.base_url = 'https://www.eventbrite.com/d/ny--new-york/nightlife/'
+        super().__init__('viewcy')
+        self.base_url = 'https://viewcy.com/events/new-york'
     
     def _extract_neighborhood(self, location_text: str) -> str:
         """Extract neighborhood from location text"""
@@ -58,14 +58,16 @@ class EventbriteScraper(BaseScraper):
     
     def scrape(self) -> List[Dict[str, Any]]:
         """
-        Scrape nightlife events from Eventbrite NYC.
+        Scrape events from Viewcy NYC.
         Limited to first 2 pages for MVP to be respectful of the platform.
         """
         self.clear_events()
         
         try:
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
             }
             
             today = datetime.now()
@@ -73,18 +75,19 @@ class EventbriteScraper(BaseScraper):
             
             for page in range(1, 3):
                 try:
-                    url = f"{self.base_url}?page={page}"
+                    url = f"{self.base_url}?page={page}" if page > 1 else self.base_url
                     response = requests.get(url, headers=headers, timeout=15)
                     
                     if response.status_code != 200:
-                        print(f"  Eventbrite returned status {response.status_code}")
+                        print(f"  Viewcy returned status {response.status_code}")
                         break
                     
                     soup = BeautifulSoup(response.content, 'html.parser')
                     
-                    event_cards = (soup.find_all('div', class_='discover-search-desktop-card') or 
-                                  soup.find_all('article', class_='event-card') or
-                                  soup.find_all('div', attrs={'data-testid': 'event-card'}))
+                    event_cards = (soup.find_all('div', class_='event-card') or 
+                                  soup.find_all('article', class_='event') or
+                                  soup.find_all('div', class_='event-item') or
+                                  soup.find_all('a', class_='event-link'))
                     
                     if not event_cards:
                         print(f"  No event cards found on page {page}")
@@ -92,14 +95,16 @@ class EventbriteScraper(BaseScraper):
                     
                     for card in event_cards:
                         try:
-                            title_elem = (card.find('h3') or card.find('h2') or 
-                                        card.find('div', class_='event-card__title'))
+                            title_elem = (card.find('h2') or card.find('h3') or 
+                                        card.find('div', class_='event-title') or
+                                        card.find('span', class_='title'))
                             if not title_elem:
                                 continue
                             title = title_elem.get_text(strip=True)
                             
-                            desc_elem = (card.find('p', class_='event-card__description') or 
-                                       card.find('div', class_='event-card-description'))
+                            desc_elem = (card.find('p', class_='event-description') or 
+                                       card.find('div', class_='description') or
+                                       card.find('p'))
                             description = desc_elem.get_text(strip=True)[:500] if desc_elem else f"Event in New York City"
                             
                             time_elem = card.find('time')
@@ -107,37 +112,51 @@ class EventbriteScraper(BaseScraper):
                             if time_elem and time_elem.get('datetime'):
                                 start_datetime = time_elem.get('datetime')
                             else:
-                                date_elem = card.find('div', class_='event-card__date')
+                                date_elem = (card.find('div', class_='event-date') or
+                                           card.find('span', class_='date') or
+                                           card.find('div', class_='date'))
                                 if date_elem:
                                     start_datetime = datetime.now().isoformat()
                             
                             if not start_datetime:
                                 continue
                             
-                            location_elem = (card.find('div', class_='event-card__location') or 
-                                           card.find('p', class_='location-info'))
+                            location_elem = (card.find('div', class_='event-location') or 
+                                           card.find('span', class_='location') or
+                                           card.find('div', class_='venue') or
+                                           card.find('p', class_='location'))
                             location_text = location_elem.get_text(strip=True) if location_elem else 'New York, NY'
                             
-                            venue_name = location_text.split(',')[0].strip() if ',' in location_text else 'TBD'
+                            venue_name = location_text.split(',')[0].strip() if ',' in location_text else location_text.strip()
+                            if not venue_name or venue_name == 'New York':
+                                venue_name = 'TBD'
                             neighborhood = self._extract_neighborhood(location_text)
                             
-                            price_elem = (card.find('div', class_='event-card__price') or 
-                                        card.find('span', class_='price'))
+                            price_elem = (card.find('div', class_='event-price') or 
+                                        card.find('span', class_='price') or
+                                        card.find('div', class_='price'))
                             price_text = price_elem.get_text(strip=True) if price_elem else 'Free'
                             price_min, price_max = self._parse_price(price_text)
                             
-                            link_elem = card.find('a', href=True)
-                            url = link_elem['href'] if link_elem else None
+                            link_elem = card if card.name == 'a' else card.find('a', href=True)
+                            url = link_elem.get('href') if link_elem else None
                             if url and not url.startswith('http'):
-                                url = f"https://www.eventbrite.com{url}"
+                                url = f"https://viewcy.com{url}"
                             
-                            raw_tags = ['nightlife', 'eventbrite', 'nyc']
-                            if 'music' in title.lower() or 'concert' in title.lower():
+                            raw_tags = ['nightlife', 'viewcy', 'nyc']
+                            title_lower = title.lower()
+                            desc_lower = description.lower()
+                            
+                            if 'music' in title_lower or 'concert' in title_lower or 'live' in title_lower:
                                 raw_tags.append('music')
-                            if 'dance' in title.lower() or 'party' in title.lower():
+                            if 'dance' in title_lower or 'party' in title_lower or 'club' in title_lower:
                                 raw_tags.append('dance')
-                            if 'comedy' in title.lower():
+                            if 'art' in title_lower or 'gallery' in title_lower or 'exhibition' in title_lower:
+                                raw_tags.append('art')
+                            if 'comedy' in title_lower or 'stand-up' in title_lower:
                                 raw_tags.append('comedy')
+                            if 'food' in title_lower or 'dining' in title_lower:
+                                raw_tags.append('food')
                             
                             event = self.create_event(
                                 title=title,
@@ -154,16 +173,16 @@ class EventbriteScraper(BaseScraper):
                             self.events.append(event)
                             
                         except Exception as e:
-                            print(f"  Error parsing Eventbrite event card: {e}")
+                            print(f"  Error parsing Viewcy event card: {e}")
                             continue
                     
                     print(f"  Scraped page {page}, found {len(event_cards)} cards")
                     
                 except Exception as e:
-                    print(f"  Error scraping Eventbrite page {page}: {e}")
+                    print(f"  Error scraping Viewcy page {page}: {e}")
                     continue
             
         except Exception as e:
-            print(f"Error scraping Eventbrite: {e}")
+            print(f"Error scraping Viewcy: {e}")
         
         return self.events

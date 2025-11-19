@@ -15,28 +15,36 @@ from scraper import (
     PoshScraper,
     HouseOfYesScraper,
     SlipperRoomScraper,
-    InstagramScraper
+    InstagramScraper,
+    ShotgunScraper,
+    ViewcyScraper
 )
 from utils.database import Database
 
 
 def deduplicate_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Deduplicate events based on title, datetime, and source.
+    Deduplicate events based on title, start_datetime, and venue_name.
+    This allows cross-platform deduplication when the same event appears on multiple sources.
     """
     seen = set()
     unique_events = []
     
     for event in events:
-        key = (
-            event.get('title', '').lower().strip(),
-            event.get('datetime', ''),
-            event.get('source', '')
-        )
+        title_normalized = event.get('title', '').lower().strip()
+        
+        start_datetime = event.get('start_datetime', '')
+        date_part = start_datetime.split('T')[0] if 'T' in start_datetime else start_datetime[:10]
+        
+        venue_normalized = event.get('venue_name', '').lower().strip()
+        
+        key = (title_normalized, date_part, venue_normalized)
         
         if key not in seen:
             seen.add(key)
             unique_events.append(event)
+        else:
+            print(f"  Skipping duplicate: {event.get('title')} at {event.get('venue_name')} on {date_part}")
     
     return unique_events
 
@@ -51,10 +59,12 @@ def run_all_scrapers() -> List[Dict[str, Any]]:
     all_events = []
     
     scrapers = [
-        EventbriteScraper(),
-        PoshScraper(),
         HouseOfYesScraper(),
         SlipperRoomScraper(),
+        EventbriteScraper(),
+        ShotgunScraper(),
+        ViewcyScraper(),
+        PoshScraper(),
         InstagramScraper()
     ]
     
