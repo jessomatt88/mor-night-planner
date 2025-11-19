@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 700px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -37,6 +37,43 @@
             color: #666;
             margin-bottom: 30px;
             font-size: 1.1em;
+        }
+        
+        .step {
+            display: none;
+        }
+        
+        .step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-header {
+            margin-bottom: 20px;
+        }
+        
+        .step-number {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .step-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .step-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
         }
         
         .form-group {
@@ -64,16 +101,22 @@
             border-color: #667eea;
         }
         
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 15px 30px;
             border: none;
             border-radius: 8px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            width: 100%;
+            flex: 1;
             transition: transform 0.2s;
         }
         
@@ -85,76 +128,220 @@
             transform: translateY(0);
         }
         
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .energy-options, .crowd-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .option-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option-card:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .option-card.selected {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+        
+        .option-card input[type="radio"] {
+            display: none;
+        }
+        
+        .option-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .option-description {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .yes-no-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .yes-no-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .yes-no-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .yes-no-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
         .results {
-            margin-top: 30px;
             display: none;
         }
         
         .results.show {
             display: block;
+            animation: fadeIn 0.3s ease-in;
         }
         
-        .event-card {
-            background: #f8f9fa;
-            padding: 20px;
+        .results-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
             border-radius: 12px;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .results-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        
+        .results-subtitle {
+            opacity: 0.9;
+            font-size: 1em;
+        }
+        
+        .recommendation-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             border-left: 4px solid #667eea;
         }
         
-        .event-time {
-            color: #667eea;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .event-title {
-            font-size: 1.3em;
+        .rec-title {
+            font-size: 1.4em;
             color: #333;
-            margin-bottom: 8px;
-        }
-        
-        .event-location {
-            color: #666;
-            margin-bottom: 8px;
-        }
-        
-        .event-description {
-            color: #555;
             margin-bottom: 10px;
-            line-height: 1.5;
         }
         
-        .event-tags {
+        .rec-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
+            gap: 15px;
+            margin-bottom: 15px;
+            color: #666;
         }
         
-        .tag {
+        .rec-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .rec-venue {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .rec-price {
+            color: #555;
+        }
+        
+        .rec-why {
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            color: #555;
+            border-left: 3px solid #667eea;
+        }
+        
+        .rec-link {
+            display: inline-block;
             background: #667eea;
             color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-        }
-        
-        .event-link {
-            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
+            transition: transform 0.2s;
         }
         
-        .event-link:hover {
-            text-decoration: underline;
+        .rec-link:hover {
+            transform: translateY(-2px);
         }
         
-        .loading {
+        .no-results {
             text-align: center;
-            padding: 20px;
-            color: #667eea;
-            font-size: 1.2em;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .no-results-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .no-results-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .no-results-text {
+            font-size: 1em;
+            line-height: 1.6;
         }
         
         .error {
@@ -165,54 +352,181 @@
             margin-top: 20px;
         }
         
-        .plan-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+        .start-over-btn {
+            margin-top: 20px;
+            background: #e0e0e0;
+            color: #333;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🌙 MOR Night Planner</h1>
-        <p class="subtitle">Plan your perfect NYC night</p>
+        <p class="subtitle">Your AI-ish concierge for the perfect NYC night</p>
         
-        <form id="planForm">
-            <div class="form-group">
-                <label for="date">Date</label>
-                <input type="date" id="date" name="date" required>
+        <div id="formSteps">
+            <!-- Step 1: Home Base -->
+            <div class="step active" data-step="1">
+                <div class="step-header">
+                    <div class="step-number">STEP 1 OF 6</div>
+                    <h2 class="step-title">Where are you starting from?</h2>
+                    <p class="step-description">Tell us your home base so we can plan your travel time</p>
+                </div>
+                <div class="form-group">
+                    <label for="homeBase">Starting Location</label>
+                    <input type="text" id="homeBase" placeholder="e.g., Harlem, Bed-Stuy, East Village" list="neighborhoods">
+                    <datalist id="neighborhoods">
+                        <option value="Harlem">
+                        <option value="Upper West Side">
+                        <option value="Upper East Side">
+                        <option value="Midtown">
+                        <option value="Chelsea">
+                        <option value="West Village">
+                        <option value="East Village">
+                        <option value="Lower East Side">
+                        <option value="Soho">
+                        <option value="Brooklyn">
+                        <option value="Williamsburg">
+                        <option value="Bushwick">
+                    </datalist>
+                </div>
+                <div class="button-group">
+                    <button onclick="nextStep()">Next</button>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="location">Starting Location</label>
-                <input type="text" id="location" name="location" placeholder="e.g., Brooklyn, Manhattan, Lower East Side" required>
+            <!-- Step 2: Date -->
+            <div class="step" data-step="2">
+                <div class="step-header">
+                    <div class="step-number">STEP 2 OF 6</div>
+                    <h2 class="step-title">What date are you going out?</h2>
+                    <p class="step-description">Pick a date for your night out</p>
+                </div>
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date">
+                </div>
+                <div class="button-group">
+                    <button class="secondary" onclick="prevStep()">Back</button>
+                    <button onclick="nextStep()">Next</button>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="mood">Vibe</label>
-                <select id="mood" name="mood" required>
-                    <option value="warm-up">Warm-up (Early evening, chill)</option>
-                    <option value="threshold" selected>Threshold (Prime time energy)</option>
-                    <option value="climax">Climax (Late night peak)</option>
-                    <option value="afterglow">Afterglow (After hours wind down)</option>
-                </select>
+            <!-- Step 3: Time Window -->
+            <div class="step" data-step="3">
+                <div class="step-header">
+                    <div class="step-number">STEP 3 OF 6</div>
+                    <h2 class="step-title">What time window are you available?</h2>
+                    <p class="step-description">When do you want to start and end your night?</p>
+                </div>
+                <div class="form-group">
+                    <label for="startTime">Start Time</label>
+                    <input type="time" id="startTime" value="19:00">
+                </div>
+                <div class="form-group">
+                    <label for="endTime">End Time</label>
+                    <input type="time" id="endTime" value="23:00">
+                </div>
+                <div class="form-group">
+                    <label for="maxTravel">Max Travel Time (minutes)</label>
+                    <input type="number" id="maxTravel" value="45" min="10" max="90" step="5">
+                </div>
+                <div class="button-group">
+                    <button class="secondary" onclick="prevStep()">Back</button>
+                    <button onclick="nextStep()">Next</button>
+                </div>
             </div>
             
-            <button type="submit">Plan My Night</button>
-        </form>
-        
-        <div id="results" class="results">
-            <div class="plan-header">
-                <h2 id="planTitle">Your Night Plan</h2>
-                <p id="planSubtitle"></p>
+            <!-- Step 4: Energy Level -->
+            <div class="step" data-step="4">
+                <div class="step-header">
+                    <div class="step-number">STEP 4 OF 6</div>
+                    <h2 class="step-title">What's your energy tonight?</h2>
+                    <p class="step-description">This helps us match you with the right vibe</p>
+                </div>
+                <div class="energy-options">
+                    <label class="option-card" onclick="selectEnergy('low')">
+                        <input type="radio" name="energy" value="low">
+                        <div class="option-title">Low Energy</div>
+                        <div class="option-description">Chill vibes, seated shows, intimate venues. Perfect for conversation and relaxation.</div>
+                    </label>
+                    <label class="option-card" onclick="selectEnergy('medium')">
+                        <input type="radio" name="energy" value="medium">
+                        <div class="option-title">Medium Energy</div>
+                        <div class="option-description">Balanced mix of seated and standing. Open to different experiences.</div>
+                    </label>
+                    <label class="option-card" onclick="selectEnergy('high')">
+                        <input type="radio" name="energy" value="high">
+                        <div class="option-title">High Energy</div>
+                        <div class="option-description">Ready to dance! Clubs, DJs, intense music. Let's get moving.</div>
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button class="secondary" onclick="prevStep()">Back</button>
+                    <button onclick="nextStep()" id="energyNext" disabled>Next</button>
+                </div>
             </div>
-            <div id="itinerary"></div>
+            
+            <!-- Step 5: Dinner -->
+            <div class="step" data-step="5">
+                <div class="step-header">
+                    <div class="step-number">STEP 5 OF 6</div>
+                    <h2 class="step-title">Do you want dinner to be part of it?</h2>
+                    <p class="step-description">We'll prioritize venues with food service</p>
+                </div>
+                <div class="yes-no-group">
+                    <button class="yes-no-btn" onclick="selectDinner(true)">Yes, please</button>
+                    <button class="yes-no-btn" onclick="selectDinner(false)">No, thanks</button>
+                </div>
+                <div class="button-group">
+                    <button class="secondary" onclick="prevStep()">Back</button>
+                    <button onclick="nextStep()" id="dinnerNext" disabled>Next</button>
+                </div>
+            </div>
+            
+            <!-- Step 6: Crowd Preference -->
+            <div class="step" data-step="6">
+                <div class="step-header">
+                    <div class="step-number">STEP 6 OF 6</div>
+                    <h2 class="step-title">Any crowd preference?</h2>
+                    <p class="step-description">Help us find the right atmosphere for you</p>
+                </div>
+                <div class="crowd-options">
+                    <label class="option-card" onclick="selectCrowd('30_plus_preferred')">
+                        <input type="radio" name="crowd" value="30_plus_preferred">
+                        <div class="option-title">30+ Preferred</div>
+                        <div class="option-description">More mature crowd, sophisticated venues</div>
+                    </label>
+                    <label class="option-card" onclick="selectCrowd('mixed_ok')">
+                        <input type="radio" name="crowd" value="mixed_ok">
+                        <div class="option-title">Mixed is OK</div>
+                        <div class="option-description">Open to all ages and vibes</div>
+                    </label>
+                    <label class="option-card" onclick="selectCrowd('no_preference')">
+                        <input type="radio" name="crowd" value="no_preference">
+                        <div class="option-title">No Preference</div>
+                        <div class="option-description">Just show me the best events</div>
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button class="secondary" onclick="prevStep()">Back</button>
+                    <button onclick="planNight()" id="crowdNext" disabled>Plan My Night</button>
+                </div>
+            </div>
         </div>
         
         <div id="loading" class="loading" style="display: none;">
-            Planning your night...
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Planning your night...</div>
+        </div>
+        
+        <div id="results" class="results">
+            <div class="results-header">
+                <h2 class="results-title">Your Night Plan</h2>
+                <p class="results-subtitle" id="resultsSubtitle"></p>
+            </div>
+            <div id="recommendations"></div>
+            <button class="start-over-btn" onclick="startOver()">Plan Another Night</button>
         </div>
         
         <div id="error" class="error" style="display: none;"></div>
@@ -220,31 +534,102 @@
     
     <script>
         const API_URL = 'http://localhost:8000';
+        let currentStep = 1;
+        let formData = {
+            homeBase: '',
+            date: '',
+            startTime: '19:00',
+            endTime: '23:00',
+            maxTravel: 45,
+            energy: '',
+            dinner: null,
+            crowd: ''
+        };
         
         document.getElementById('date').valueAsDate = new Date();
         
-        document.getElementById('planForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        function nextStep() {
+            const step = currentStep;
             
-            const date = document.getElementById('date').value;
-            const location = document.getElementById('location').value;
-            const mood = document.getElementById('mood').value;
+            if (step === 1) {
+                const homeBase = document.getElementById('homeBase').value.trim();
+                if (!homeBase) {
+                    alert('Please enter your starting location');
+                    return;
+                }
+                formData.homeBase = homeBase;
+            } else if (step === 2) {
+                const date = document.getElementById('date').value;
+                if (!date) {
+                    alert('Please select a date');
+                    return;
+                }
+                formData.date = date;
+            } else if (step === 3) {
+                formData.startTime = document.getElementById('startTime').value;
+                formData.endTime = document.getElementById('endTime').value;
+                formData.maxTravel = parseInt(document.getElementById('maxTravel').value);
+            }
             
-            document.getElementById('results').classList.remove('show');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+            currentStep++;
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+        }
+        
+        function prevStep() {
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+            currentStep--;
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+        }
+        
+        function selectEnergy(level) {
+            formData.energy = level;
+            document.querySelectorAll('.energy-options .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.getElementById('energyNext').disabled = false;
+        }
+        
+        function selectDinner(wants) {
+            formData.dinner = wants;
+            document.querySelectorAll('.yes-no-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.getElementById('dinnerNext').disabled = false;
+        }
+        
+        function selectCrowd(preference) {
+            formData.crowd = preference;
+            document.querySelectorAll('.crowd-options .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.getElementById('crowdNext').disabled = false;
+        }
+        
+        async function planNight() {
+            document.getElementById('formSteps').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             document.getElementById('error').style.display = 'none';
             
             try {
-                const response = await fetch(`${API_URL}/plan-night`, {
+                const response = await fetch(`${API_URL}/plan-night-v2`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        date: date,
-                        starting_location: location,
-                        walking_radius: 1.0,
-                        mood: mood
+                        date: formData.date,
+                        start_time: formData.startTime,
+                        end_time: formData.endTime,
+                        home_base: formData.homeBase,
+                        max_travel_minutes: formData.maxTravel,
+                        energy_level: formData.energy,
+                        dress_code: 'smart_casual',
+                        wants_dinner: formData.dinner,
+                        crowd_preference: formData.crowd
                     })
                 });
                 
@@ -259,44 +644,125 @@
                 console.error('Error:', error);
                 document.getElementById('error').textContent = `Error: ${error.message}. Make sure the API is running on ${API_URL}`;
                 document.getElementById('error').style.display = 'block';
+                document.getElementById('formSteps').style.display = 'block';
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
-        });
+        }
         
         function displayResults(data) {
             const resultsDiv = document.getElementById('results');
-            const itineraryDiv = document.getElementById('itinerary');
+            const recommendationsDiv = document.getElementById('recommendations');
             
-            document.getElementById('planTitle').textContent = data.message || 'Your Night Plan';
-            document.getElementById('planSubtitle').textContent = `${data.total_events} events found`;
+            const energyLabels = {
+                'low': 'Low Energy',
+                'medium': 'Medium Energy',
+                'high': 'High Energy'
+            };
             
-            itineraryDiv.innerHTML = '';
+            document.getElementById('resultsSubtitle').textContent = 
+                `${energyLabels[data.energy_level]} • ${data.home_base} • ${data.recommendations.length} recommendations`;
             
-            if (data.itinerary && data.itinerary.length > 0) {
-                data.itinerary.forEach(event => {
-                    const eventCard = document.createElement('div');
-                    eventCard.className = 'event-card';
+            recommendationsDiv.innerHTML = '';
+            
+            if (data.recommendations && data.recommendations.length > 0) {
+                data.recommendations.forEach((rec, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'recommendation-card';
                     
-                    eventCard.innerHTML = `
-                        <div class="event-time">${event.time}</div>
-                        <div class="event-title">${event.title}</div>
-                        <div class="event-location">📍 ${event.location}</div>
-                        <div class="event-description">${event.description}</div>
-                        <div><strong>Price:</strong> ${event.price}</div>
-                        ${event.url ? `<div><a href="${event.url}" target="_blank" class="event-link">View Details →</a></div>` : ''}
-                        <div class="event-tags">
-                            ${event.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    const startTime = rec.start_datetime ? new Date(rec.start_datetime).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    }) : 'TBD';
+                    
+                    const priceText = rec.price_min !== null && rec.price_max !== null 
+                        ? `$${rec.price_min}-$${rec.price_max}`
+                        : rec.price_min !== null 
+                        ? `$${rec.price_min}`
+                        : 'See website';
+                    
+                    card.innerHTML = `
+                        <div class="rec-title">${rec.title || 'Untitled Event'}</div>
+                        <div class="rec-meta">
+                            <div class="rec-meta-item">
+                                <span>⏰</span>
+                                <span>${startTime}</span>
+                            </div>
+                            <div class="rec-meta-item">
+                                <span>📍</span>
+                                <span class="rec-venue">${rec.venue_name || 'TBD'}</span>
+                            </div>
+                            ${rec.neighborhood ? `
+                            <div class="rec-meta-item">
+                                <span>${rec.neighborhood}</span>
+                            </div>
+                            ` : ''}
+                            <div class="rec-meta-item rec-price">
+                                <span>💰</span>
+                                <span>${priceText}</span>
+                            </div>
                         </div>
+                        ${rec.why_this ? `
+                        <div class="rec-why">
+                            <strong>Why this?</strong> ${rec.why_this}
+                        </div>
+                        ` : ''}
+                        ${rec.url ? `
+                        <a href="${rec.url}" target="_blank" class="rec-link">Open Details →</a>
+                        ` : ''}
                     `;
                     
-                    itineraryDiv.appendChild(eventCard);
+                    recommendationsDiv.appendChild(card);
                 });
             } else {
-                itineraryDiv.innerHTML = '<p>No events found for your criteria. Try running the scraper first!</p>';
+                recommendationsDiv.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">🔍</div>
+                        <h3 class="no-results-title">No events found</h3>
+                        <p class="no-results-text">
+                            We couldn't find any events matching your criteria for this date.<br>
+                            Try widening your time window or travel distance, or pick a different date.
+                        </p>
+                    </div>
+                `;
             }
             
             resultsDiv.classList.add('show');
+        }
+        
+        function startOver() {
+            currentStep = 1;
+            formData = {
+                homeBase: '',
+                date: '',
+                startTime: '19:00',
+                endTime: '23:00',
+                maxTravel: 45,
+                energy: '',
+                dinner: null,
+                crowd: ''
+            };
+            
+            document.getElementById('homeBase').value = '';
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('startTime').value = '19:00';
+            document.getElementById('endTime').value = '23:00';
+            document.getElementById('maxTravel').value = 45;
+            
+            document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+            document.querySelectorAll('.yes-no-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            document.getElementById('energyNext').disabled = true;
+            document.getElementById('dinnerNext').disabled = true;
+            document.getElementById('crowdNext').disabled = true;
+            
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.querySelector('.step[data-step="1"]').classList.add('active');
+            
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('formSteps').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
         }
     </script>
 </body>

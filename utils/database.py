@@ -33,22 +33,27 @@ class Database:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 description TEXT,
-                datetime TEXT NOT NULL,
-                location TEXT,
-                price TEXT,
+                start_datetime TEXT NOT NULL,
+                end_datetime TEXT,
+                venue_name TEXT,
+                neighborhood TEXT,
+                city TEXT,
+                price_min REAL,
+                price_max REAL,
                 url TEXT,
-                tags TEXT,
-                source TEXT NOT NULL,
-                raw_payload TEXT,
-                discovered_at TEXT NOT NULL,
-                UNIQUE(title, datetime, source)
+                source_platform TEXT NOT NULL,
+                raw_tags TEXT,
+                created_at TEXT NOT NULL,
+                UNIQUE(title, start_datetime, venue_name)
             )
         ''')
         
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_datetime ON events(datetime)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_location ON events(location)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_source ON events(source)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_tags ON events(tags)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_start_datetime ON events(start_datetime)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_venue_name ON events(venue_name)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_neighborhood ON events(neighborhood)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_city ON events(city)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_source_platform ON events(source_platform)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_raw_tags ON events(raw_tags)')
         
         conn.commit()
         conn.close()
@@ -61,18 +66,22 @@ class Database:
         try:
             cursor.execute('''
                 INSERT OR IGNORE INTO events 
-                (title, description, datetime, location, price, url, tags, source, raw_payload, discovered_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (title, description, start_datetime, end_datetime, venue_name, neighborhood, 
+                 city, price_min, price_max, url, source_platform, raw_tags, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 event.get('title'),
                 event.get('description'),
-                event.get('datetime'),
-                event.get('location'),
-                event.get('price'),
+                event.get('start_datetime'),
+                event.get('end_datetime'),
+                event.get('venue_name'),
+                event.get('neighborhood'),
+                event.get('city'),
+                event.get('price_min'),
+                event.get('price_max'),
                 event.get('url'),
-                json.dumps(event.get('tags', [])),
-                event.get('source'),
-                json.dumps(event),
+                event.get('source_platform'),
+                json.dumps(event.get('raw_tags', [])),
                 datetime.now().isoformat()
             ))
             
@@ -101,10 +110,10 @@ class Database:
         params = []
         
         if date:
-            query += ' WHERE date(datetime) = date(?)'
+            query += ' WHERE date(start_datetime) = date(?)'
             params.append(date)
         
-        query += ' ORDER BY datetime'
+        query += ' ORDER BY start_datetime'
         
         if limit:
             query += ' LIMIT ?'
@@ -117,10 +126,8 @@ class Database:
         
         for row in cursor.fetchall():
             event = dict(zip(columns, row))
-            if event.get('tags'):
-                event['tags'] = json.loads(event['tags'])
-            if event.get('raw_payload'):
-                event['raw_payload'] = json.loads(event['raw_payload'])
+            if event.get('raw_tags'):
+                event['raw_tags'] = json.loads(event['raw_tags'])
             events.append(event)
         
         conn.close()
@@ -131,7 +138,7 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
         
-        cursor.execute('DELETE FROM events WHERE datetime < ?', (cutoff_date,))
+        cursor.execute('DELETE FROM events WHERE start_datetime < ?', (cutoff_date,))
         deleted_count = cursor.rowcount
         
         conn.commit()

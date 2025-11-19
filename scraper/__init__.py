@@ -4,6 +4,8 @@ from .posh_scraper import PoshScraper
 from .house_of_yes_scraper import HouseOfYesScraper
 from .slipper_room_scraper import SlipperRoomScraper
 from .instagram_scraper import InstagramScraper
+from .shotgun_scraper import ShotgunScraper
+from .viewcy_scraper import ViewcyScraper
 
 __all__ = [
     'BaseScraper',
@@ -12,4 +14,6 @@ __all__ = [
     'HouseOfYesScraper',
     'SlipperRoomScraper',
     'InstagramScraper',
+    'ShotgunScraper',
+    'ViewcyScraper',
 ]

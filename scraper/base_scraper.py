@@ -21,21 +21,28 @@ class BaseScraper(ABC):
     
     def validate_event(self, event: Dict[str, Any]) -> bool:
         """Validate that an event has all required fields"""
-        required_fields = ['title', 'description', 'datetime', 'location', 'price', 'url', 'tags']
+        required_fields = ['title', 'start_datetime', 'venue_name', 'source_platform']
         return all(field in event for field in required_fields)
     
-    def create_event(self, title: str, description: str, datetime_str: str, 
-                    location: str, price: str, url: str, tags: List[str]) -> Dict[str, Any]:
+    def create_event(self, title: str, description: str, start_datetime: str, 
+                    venue_name: str, neighborhood: str = None, city: str = "New York",
+                    price_min: float = None, price_max: float = None,
+                    url: str = None, raw_tags: List[str] = None,
+                    end_datetime: str = None) -> Dict[str, Any]:
         """Create a standardized event dictionary"""
         event = {
             'title': title,
             'description': description,
-            'datetime': datetime_str,
-            'location': location,
-            'price': price,
+            'start_datetime': start_datetime,
+            'end_datetime': end_datetime,
+            'venue_name': venue_name,
+            'neighborhood': neighborhood,
+            'city': city,
+            'price_min': price_min,
+            'price_max': price_max,
             'url': url,
-            'tags': tags,
-            'source': self.source_name
+            'raw_tags': raw_tags or [],
+            'source_platform': self.source_name
         }
         
         if self.validate_event(event):
